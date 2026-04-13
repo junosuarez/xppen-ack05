@@ -1,15 +1,15 @@
 import Foundation
 import IOKit.hid
 
-class HIDManager {
+public class HIDManager {
     private let manager: IOHIDManager
-    var onInputReport: ((Data, Int, IOHIDDevice) -> Void)?
+    public var onInputReport: ((Data, Int, IOHIDDevice) -> Void)?
     
-    init() {
+    public init() {
         manager = IOHIDManagerCreate(kCFAllocatorDefault, 0)
     }
     
-    func findDevices() -> [IOHIDDevice] {
+    public func findDevices() -> [IOHIDDevice] {
         IOHIDManagerSetDeviceMatching(manager, nil)
         let deviceSet = IOHIDManagerCopyDevices(manager)
         if let deviceSet = deviceSet as? Set<IOHIDDevice> {
@@ -18,10 +18,9 @@ class HIDManager {
         return []
     }
     
-    func start(vendorID: Int, productID: Int) {
+    public func start(vendorID: Int) {
         let matchingDict: [String: Any] = [
-            kIOHIDVendorIDKey: vendorID,
-            kIOHIDProductIDKey: productID
+            kIOHIDVendorIDKey: vendorID
         ]
         IOHIDManagerSetDeviceMatching(manager, matchingDict as CFDictionary)
         
@@ -38,7 +37,10 @@ class HIDManager {
         IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
         
         let res = IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeSeizeDevice))
-        if res != kIOReturnSuccess {
+        if res == kIOReturnSuccess {
+            print("HID SEIZE SUCCESSFUL")
+        } else {
+            print("HID SEIZE FAILED: \(res) (Operating in non-exclusive mode)")
             IOHIDManagerOpen(manager, 0)
         }
         
