@@ -24,6 +24,10 @@ let package = Package(
             dependencies: ["XPPenCore"]
         ),
         .testTarget(
+            name: "XPPenCoreTests",
+            dependencies: ["XPPenCore"]
+        ),
+        .testTarget(
             name: "xppen-utilityTests",
             dependencies: ["xppen-utility"]
         ),
