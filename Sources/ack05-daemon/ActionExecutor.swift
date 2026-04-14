@@ -13,6 +13,7 @@ public class ActionExecutor {
         switch action {
         case .shell(let command):
             print("Executing Shell: \(command)")
+            fflush(stdout)
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/bin/bash")
             process.arguments = ["-c", command]
@@ -24,9 +25,14 @@ public class ActionExecutor {
             for (index, keyCode) in keyCodes.enumerated() {
                 let currentFlags = index < flags.count ? flags[index] : CGEventFlags()
                 print("Synthesizing KeyCode: \(keyCode) Flags: \(currentFlags.rawValue)")
+                fflush(stdout)
                 
                 let keyDown = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: true)
                 let keyUp = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: false)
+                
+                // Tag events as synthesized by us
+                keyDown?.setIntegerValueField(.eventSourceUserData, value: 0xAC05)
+                keyUp?.setIntegerValueField(.eventSourceUserData, value: 0xAC05)
                 
                 keyDown?.flags = currentFlags
                 keyUp?.flags = currentFlags

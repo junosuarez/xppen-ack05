@@ -19,6 +19,10 @@ let package = Package(
             name: "ack05-daemon",
             dependencies: ["XPPenCore"]
         ),
+        .testTarget(
+            name: "ack05-daemonTests",
+            dependencies: ["ack05-daemon"]
+        ),
         .executableTarget(
             name: "xppen-config-app",
             dependencies: ["XPPenCore"]

@@ -5,6 +5,7 @@ import CoreGraphics
 @MainActor
 class DaemonState {
     let hidManager = HIDManager()
+    let interceptor = EventInterceptor()
     var deviceState = DeviceState()
     let executor = ActionExecutor()
     let configManager = ConfigManager()
@@ -18,6 +19,19 @@ class DaemonState {
     init() { 
         self.currentConfig = ConfigManager().load()
         setupWatcher()
+        
+        // Setup synchronous suppression
+        hidManager.onInputReportSync = { [weak self] data, reportID, sender in
+            if reportID == 6 && data.count >= 3 {
+                let modifiers = data[1]
+                let scancode = data[2]
+                self?.interceptor.update(modifiers: modifiers, scancode: scancode)
+            }
+        }
+        
+        if let source = interceptor.getSource() {
+            hidManager.addSource(source)
+        }
     }
     
     func setupWatcher() {
@@ -30,6 +44,7 @@ class DaemonState {
         watcher.setEventHandler { [weak self] in
             Task { @MainActor in
                 print("Config file change detected. Reloading...")
+                fflush(stdout)
                 self?.currentConfig = self?.configManager.load() ?? AppConfig(mappings: [:])
             }
         }
@@ -63,6 +78,7 @@ class DaemonState {
         }
         print("ACK05-B Daemon Started.")
         print("Monitoring config at: \(configManager.getConfigPath())")
+        fflush(stdout)
         hidManager.start(vendorID: vendorID)
     }
     
@@ -83,6 +99,7 @@ class DaemonState {
                 wasCenterActive = true
             }
         } else { wasCenterActive = false }
+        fflush(stdout)
     }
 }
 
