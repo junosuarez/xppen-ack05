@@ -20,8 +20,8 @@ A userspace driver and configuration suite for the XP-Pen ACK05-B Wireless Short
 ## Getting Started
 
 ### Prerequisites
-- macOS 13.0+
-- Swift 6.0+
+- macOS 26.0+
+- Swift 6.3+
 
 ### Build
 ```bash
